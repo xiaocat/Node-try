@@ -1,0 +1,69 @@
+var http = require('http'),
+    util = require('util');
+
+// console.log(util.inspect(http, {colors: true}));
+
+var server = http.createServer(function(req, res){
+    console.time('请求');
+    // console.log(util.inspect(req, {colors: true}));
+
+    res.on('close', function(){
+      console.log('connect close');
+    });
+
+    res.on('finish', function(){
+      console.log('connect finish');
+      console.timeEnd('请求');
+    });
+
+    res.setHeader("Content-Type", "text/html");
+
+    console.log('contentType, %s', res.getHeader('Content-Type'));
+
+    res.writeHead(200, {
+      'Content-Length' : Buffer.byteLength('成功'),
+      'Content-Type' : 'text/plain',
+      'Trailer': 'Content-MD5'
+    });
+
+    res.setTimeout(10, function(){
+      console.log('connnect timeout');
+    });
+
+    console.log('hedersSent, %s', res.headersSent);
+
+    res.write('成功', 'utf-8');
+
+    res.addTrailers({'Content-MD5': "7895bf4b8828b55ceaf47747b4bca667"});
+
+    res.end();
+
+  });
+
+server.on('connection', function(socket){
+  console.log('----------socket connection-----------------');
+  // console.log(util.inspect(socket, {colors: true}));
+});
+
+server.on('connect', function(req, socket, head){
+  console.log('----------connect-----------------');
+  console.log(util.inspcet(req, {colors: true}));
+  // console.log(util.inspcet(socket, {colors: true}));
+  // console.log(util.inspcet(head, {colors: true}));
+
+});
+
+server.on('close', function(){
+  console.timeEnd('请求');
+});
+
+server.listen(1900, function(e){
+  console.info('start a server for port : 1900');
+});
+
+// http.request({
+//   port: 1900
+// }, function(res){
+//   console.warn('this is response');
+//   console.log(util.inspcet(res, {colors: true}));
+// });
